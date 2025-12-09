@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    environment:
+      - CLUSTER_NAME=test
+    volumes:
+      - ./hadoop/namenode:/hadoop/dfs/name
+    networks:
+      - hadoop
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    environment:
+      - CLUSTER_NAME=test
+    ports:
+      - "9864:9864"
+    volumes:
+      - ./hadoop/datanode:/hadoop/dfs/data
+    networks:
+      - hadoop
+
+networks:
+  hadoop:
