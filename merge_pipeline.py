@@ -83,14 +83,21 @@ def run_pipeline():
     merged_df.rename(columns={'date_time_traffic': 'date_time'}, inplace=True)
     merged_df.drop(columns=['merge_key'], inplace=True)
 
-    # 4. Feature Engineering
+    # 4. Feature Engineering (Extract Year/Month/Day)
     merged_df = feature_engineering(merged_df)
+
+    # --- NEW STEP: Drop original date_time for Factor Analysis ---
+    # Since we have extracted numeric features (year, month, day, hour),
+    # we remove the timestamp object to avoid errors in ML models.
+    print("Dropping 'date_time' column to prepare for Factor Analysis...")
+    merged_df.drop(columns=['date_time'], inplace=True)
+    # -------------------------------------------------------------
 
     # 5. Final Audit
     print("\n--- Gold Layer Audit ---")
     print(f"Total Merged Records: {len(merged_df)}")
     print(f"Missing Values: {merged_df.isnull().sum().sum()}")
-    print(f"Columns: {list(merged_df.columns)}")
+    print(f"Final Columns: {list(merged_df.columns)}")
     
     # 6. Save to Gold Layer
     os.makedirs(OUTPUT_DIR, exist_ok=True)
