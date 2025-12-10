@@ -38,14 +38,17 @@ def align_timestamps(df, time_col='date_time'):
 
 def feature_engineering(df):
     """Adds analytical features for the Gold Layer."""
-    # 1. Day of Week (e.g., Monday, Tuesday)
+    # 1. Time Components (New: Year, Month, Day) -> Critical for Factor Analysis
+    df['year'] = df['date_time'].dt.year
+    df['month'] = df['date_time'].dt.month
+    df['day'] = df['date_time'].dt.day
+    df['hour'] = df['date_time'].dt.hour
+    
+    # 2. Day Name
     df['day_of_week'] = df['date_time'].dt.day_name()
     
-    # 2. Is Weekend? (True if Saturday or Sunday)
+    # 3. Is Weekend? (True if Saturday or Sunday)
     df['is_weekend'] = df['date_time'].dt.weekday >= 5
-    
-    # 3. Hour of Day
-    df['hour'] = df['date_time'].dt.hour
     
     # 4. Rush Hour Flag (Morning: 7-9 AM, Evening: 4-7 PM)
     df['is_rush_hour'] = df['hour'].apply(lambda x: 1 if (7 <= x <= 9) or (16 <= x <= 19) else 0)
