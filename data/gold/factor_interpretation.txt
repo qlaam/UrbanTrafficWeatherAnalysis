@@ -1,0 +1,17 @@
+
+Factor 1: Atmospheric Stability Factor
+This factor is mainly influenced by air pressure (loading = 0.41) and to a lesser extent by visibility.
+It reflects variations in atmospheric stability but has weak influence from other weather variables.
+
+Factor 2: Traffic Flow Stress Factor
+This factor loads primarily on vehicle_count (0.33), representing traffic flow levels.
+Other variables have very weak contributions, indicating that traffic measures are almost independent of weather conditions in this dataset.
+
+Factor 3: Weather Severity Factor
+This factor has moderate loading from air pressure (0.31) and weak negative loadings from humidity and wind speed.
+It may represent a composite measure of weather severity, but its influence on traffic variables is minimal.
+
+Weather–Traffic Relationship:
+Based on the loadings:
+No meaningful weather variable shows strong correlation with traffic flow or accident count. because the data is independent and synthetic. 
+but air_pressure_hpa 0.412299 has the highest influence on traffic 
