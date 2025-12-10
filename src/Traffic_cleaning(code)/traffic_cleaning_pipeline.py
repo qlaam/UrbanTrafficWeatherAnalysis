@@ -8,7 +8,7 @@ Original file is located at
 """
 
 # Commented out IPython magic to ensure Python compatibility.
-!git clone https://github.com/qlaam/UrbanTrafficWeatherAnalysis.git
+# !git clone https://github.com/qlaam/UrbanTrafficWeatherAnalysis.git
 # %cd UrbanTrafficWeatherAnalysis
 
 import pandas as pd

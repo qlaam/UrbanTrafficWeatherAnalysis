@@ -3,8 +3,8 @@ import numpy as np
 import os
 
 # --- Configuration ---
-TRAFFIC_PATH = 'data/cleaned/traffic_cleaned.parquet'
-WEATHER_PATH = 'data/cleaned/weather_cleaned.parquet'
+TRAFFIC_PATH = 'data/cleaned/traffic_cleaned/traffic_cleaned.parquet'
+WEATHER_PATH = 'data/cleaned/weather_cleaned/weather_cleaned.parquet'
 OUTPUT_DIR = 'data/gold'
 OUTPUT_FILE = 'traffic_weather_merged.parquet'
 OUTPUT_CSV = 'traffic_weather_merged.csv'
