@@ -10,13 +10,56 @@ OUTPUT_FILE = 'traffic_weather_merged.parquet'
 OUTPUT_CSV = 'traffic_weather_merged.csv'
 
 def load_data():
-    """Loads cleaned datasets from the Silver Layer."""
     print("Loading Silver Layer data...")
+    
     df_traffic = pd.read_csv(TRAFFIC_PATH)
     df_weather = pd.read_csv(WEATHER_PATH)
+
+    df_traffic.columns = df_traffic.columns.str.strip()
+    df_weather.columns = df_weather.columns.str.strip()
+
+    for df, name in [(df_traffic, "Traffic"), (df_weather, "Weather")]:
+        for col in ['date_time', 'city']:
+            if col not in df.columns:
+                raise ValueError(f"{name} missing required column: {col}")
+
     print(f"Traffic Data Loaded: {df_traffic.shape}")
     print(f"Weather Data Loaded: {df_weather.shape}")
+
     return df_traffic, df_weather
+
+
+
+def check_time_format(df1, df2, time_col='date_time'):
+    """
+    Ensures both dataframes have the same datetime format
+    before merging.
+    """
+    for name, df in [('Traffic', df1), ('Weather', df2)]:
+        if time_col not in df.columns:
+            raise ValueError(f"{name} dataframe is missing '{time_col}' column")
+
+        # Convert to datetime
+        df[time_col] = pd.to_datetime(df[time_col], errors='coerce')
+
+        # Fail fast if conversion failed
+        if df[time_col].isna().any():
+            bad_rows = df[df[time_col].isna()].shape[0]
+            raise ValueError(
+                f"{name} dataframe has {bad_rows} invalid datetime values in '{time_col}'"
+            )
+
+        # Ensure timezone consistency (naive)
+        if df[time_col].dt.tz is not None:
+            df[time_col] = df[time_col].dt.tz_localize(None)
+
+    # Final safety check
+    if df1[time_col].dtype != df2[time_col].dtype:
+        raise TypeError("Datetime formats do not match after conversion")
+
+    print("Time format check passed for both datasets")
+    return df1, df2
+
 
 def align_timestamps(df, time_col='date_time'):
     """
@@ -45,25 +88,30 @@ def feature_engineering(df):
     return df
 
 def run_pipeline():
+
     # 1. Load Data
     traffic, weather = load_data()
-    if traffic is None or weather is None: return
+    if traffic is None or weather is None:
+        return
 
-    # 2. Temporal Alignment
-    traffic = align_timestamps(traffic)
-    weather = align_timestamps(weather)
+    # 2. Ensure consistent time format
+    traffic, weather = check_time_format(traffic, weather, time_col='date_time')
 
-    # 3. Merging (Inner Join)
+    # 3. Temporal Alignment
+    traffic = align_timestamps(traffic, time_col='date_time')
+    weather = align_timestamps(weather, time_col='date_time')
+
+    # 4. Merging
     print("Merging datasets...")
-    # Join on City and the rounded Time (merge_key)
     merged_df = pd.merge(
-        traffic, 
-        weather, 
-        left_on=['merge_key', 'city'], 
-        right_on=['merge_key', 'city'], 
+        traffic,
+        weather,
+        left_on=['merge_key', 'city'],
+        right_on=['merge_key', 'city'],
         how='inner',
         suffixes=('_traffic', '_weather')
     )
+
 
 
     # Clean up redundant columns after merge
@@ -88,13 +136,9 @@ def run_pipeline():
     merged_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_CSV), index=False)
     print(f"\nSuccess! Data saved to {OUTPUT_DIR}/{OUTPUT_FILE}")
 
-    print("---"*20)
-    print()
-    print()
-    print(f"Merged data: {merged_df.info()}")
-    print()
-    print()
-    print("---"*20) 
+    print("Merged data info:")
+    merged_df.info()
+   
 
 
 
